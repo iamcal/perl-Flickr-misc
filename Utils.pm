@@ -19,6 +19,10 @@ sub load_deploy_list {
 
 	close F;
 
+	#if ($ARGV[0]){
+	#	@{$list} = grep{ $_->{name} eq $ARGV[0]  }@{$list};
+	#}
+
 	return $list;
 }
 

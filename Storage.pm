@@ -25,7 +25,9 @@ sub fetch_folder_list {
 sub cat_folder {
 	my ($folder, $rx) = @_;
 
-	opendir D, $folder or die $!;
+	return unless -e $folder;
+
+	opendir D, $folder or die "opendir $folder : $!";
 	my @files = readdir D;
 	closedir D;
 
@@ -44,6 +46,53 @@ sub cat_folder {
 	if ($img_count){
 		print "$folder $img_count:$img_size\n";
 	}
+}
+
+sub compare_cats{
+	my ($file1, $file2) = @_;
+
+	my %map;
+	my %rmap;
+
+	# first load the master into memory
+
+	open F, $file1 or die $!;
+	while(my $line = <F>){
+		chomp $line;
+		my ($path, $spec) = split /\s/, $line;
+		$map{$path} = $spec;
+	}
+	close F;
+
+
+	# now load the slave and remove duplicates
+
+	open F, $file2 or die $!;
+	while(my $line = <F>){
+		chomp $line;
+		my ($path, $spec) = split /\s/, $line;
+
+		if (defined $map{$path}){
+			if ($map{$path} eq $spec){
+				delete $map{$path};
+			}
+		}else{
+			$rmap{$path} = $spec;
+		}
+	}
+	close F;
+
+
+	# dump results
+
+	return (keys %map, keys %rmap);
+
+#	for my $line(keys %map){
+#		print "$line\n";
+#	}
+#	for my $line(keys %rmap){
+#		print "$line\n";
+#	}
 }
 
 1;
